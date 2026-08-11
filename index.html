@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>You Better Say It! — COTLG Games</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Nunito+Sans:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --purple-deep:#241040;
+  --purple:#3D1E63;
+  --purple-soft:#553085;
+  --gold:#F0C24B;
+  --gold-deep:#C9971F;
+  --gold-pale:#FBE9B7;
+  --cream:#FDF6E3;
+  --coral:#E6543F;
+  --coral-deep:#B93A28;
+  --shadow:rgba(0,0,0,.45);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;}
+body{
+  font-family:'Nunito Sans',sans-serif;
+  background:radial-gradient(ellipse at 50% -10%, var(--purple-soft) 0%, var(--purple) 45%, var(--purple-deep) 100%);
+  color:var(--cream);
+  user-select:none;-webkit-user-select:none;
+  touch-action:manipulation;
+}
+#app{height:100%;display:flex;flex-direction:column;position:relative;overflow:hidden;}
+
+/* ---------- shared ---------- */
+.screen{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;padding:22px;text-align:center;}
+.screen.active{display:flex;}
+.display{font-family:'Cinzel',serif;}
+.btn{
+  font-family:'Nunito Sans',sans-serif;font-weight:900;letter-spacing:.04em;
+  border:none;border-radius:16px;cursor:pointer;color:var(--purple-deep);
+  background:linear-gradient(180deg,var(--gold-pale) 0%,var(--gold) 45%,var(--gold-deep) 100%);
+  box-shadow:0 5px 0 #8a6612, 0 9px 18px var(--shadow);
+  padding:16px 34px;font-size:1.15rem;text-transform:uppercase;
+  transition:transform .08s ease, box-shadow .08s ease;
+}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 #8a6612, 0 4px 10px var(--shadow);}
+.btn.secondary{
+  background:transparent;color:var(--gold-pale);
+  border:2px solid var(--gold-deep);box-shadow:none;font-weight:800;
+  padding:12px 26px;font-size:.95rem;
+}
+.btn.secondary:active{transform:translateY(2px);}
+.small-note{font-size:.8rem;opacity:.75;line-height:1.5;}
+
+/* ---------- title ---------- */
+#title-screen .halo{
+  width:120px;height:120px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, var(--gold-pale), var(--gold) 55%, var(--gold-deep));
+  box-shadow:0 0 60px rgba(240,194,75,.55), inset 0 -8px 18px rgba(0,0,0,.25);
+  display:flex;align-items:center;justify-content:center;font-size:3.4rem;margin-bottom:20px;
+  animation:float 3.4s ease-in-out infinite;
+}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+#title-screen h1{font-size:2.5rem;font-weight:900;color:var(--gold);text-shadow:0 3px 0 #6b4d0d,0 8px 22px var(--shadow);line-height:1.1;}
+#title-screen .sub{margin:14px 0 30px;font-size:1rem;font-weight:700;color:var(--gold-pale);opacity:.9;max-width:300px;line-height:1.5;}
+.title-buttons{display:flex;flex-direction:column;gap:14px;align-items:center;}
+.brandline{position:absolute;bottom:16px;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;opacity:.55;font-weight:700;}
+.disclaimer{
+  margin-top:24px;max-width:330px;padding:12px 16px;border-radius:14px;
+  background:rgba(0,0,0,.26);border:1px solid rgba(240,194,75,.3);
+  font-size:.76rem;line-height:1.55;opacity:.92;text-align:center;
+}
+.disclaimer b{color:var(--gold-pale);}
+.disclaimer .d-title{
+  display:block;font-weight:900;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--gold);font-size:.7rem;margin-bottom:5px;
+}
+
+/* ---------- how to play ---------- */
+#howto-screen .card, #award-screen .card{
+  background:rgba(0,0,0,.28);border:1px solid rgba(240,194,75,.35);border-radius:20px;
+  padding:22px;max-width:360px;width:100%;text-align:left;
+}
+#howto-screen h2{color:var(--gold);font-size:1.5rem;margin-bottom:14px;text-align:center;}
+#howto-screen ol{list-style:none;counter-reset:step;display:flex;flex-direction:column;gap:13px;font-size:.93rem;line-height:1.5;}
+#howto-screen ol li{counter-increment:step;display:flex;gap:12px;align-items:flex-start;}
+#howto-screen ol li::before{
+  content:counter(step);flex:0 0 26px;height:26px;border-radius:50%;
+  background:var(--gold);color:var(--purple-deep);font-weight:900;font-size:.9rem;
+  display:flex;align-items:center;justify-content:center;margin-top:1px;
+}
+#howto-screen ol li span{flex:1;display:block;min-width:0;}
+#howto-screen ol li b{color:var(--gold-pale);}
+#howto-screen .btn{margin-top:22px;}
+
+/* ---------- categories ---------- */
+#cat-screen h2{color:var(--gold);font-size:1.6rem;margin-bottom:6px;}
+#cat-screen .lead{font-size:.9rem;opacity:.85;margin-bottom:20px;}
+.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:380px;}
+.cat-tile{
+  border:2px solid rgba(240,194,75,.4);border-radius:18px;background:rgba(0,0,0,.25);
+  color:var(--cream);padding:18px 10px 15px;cursor:pointer;font-family:'Nunito Sans',sans-serif;
+  display:flex;flex-direction:column;align-items:center;gap:7px;
+  transition:transform .1s ease, background .15s ease, border-color .15s ease;
+}
+.cat-tile:active{transform:scale(.96);}
+.cat-tile .icon{font-size:1.9rem;}
+.cat-tile .name{font-weight:800;font-size:.88rem;line-height:1.25;}
+.cat-tile.everything{
+  grid-column:1 / -1;flex-direction:row;justify-content:center;gap:12px;
+  background:linear-gradient(135deg, rgba(240,194,75,.22), rgba(240,194,75,.08));
+  border-color:var(--gold);
+}
+.cat-tile.everything .name{font-size:1.05rem;color:var(--gold-pale);}
+
+/* ---------- ready ---------- */
+#ready-screen .pass-icon{font-size:4rem;margin-bottom:16px;animation:float 2.8s ease-in-out infinite;}
+#ready-screen h2{color:var(--gold);font-size:1.7rem;margin-bottom:10px;}
+#ready-screen p{max-width:300px;line-height:1.55;font-size:.98rem;opacity:.92;margin-bottom:8px;}
+#ready-screen .cat-label{
+  display:inline-block;margin:14px 0 26px;padding:8px 18px;border-radius:999px;
+  border:1.5px solid var(--gold-deep);color:var(--gold-pale);font-weight:800;font-size:.9rem;letter-spacing:.03em;
+}
+.manage-row{display:flex;gap:12px;margin-top:14px;}
+.manage-row .btn.secondary{padding:10px 18px;font-size:.85rem;}
+.manage-row .btn.danger{border-color:var(--coral);color:#F5B3A8;}
+
+/* ---------- confirm dialog ---------- */
+#confirm-overlay{
+  position:absolute;inset:0;background:rgba(12,5,26,.78);z-index:20;
+  display:none;align-items:center;justify-content:center;padding:26px;
+}
+#confirm-overlay.open{display:flex;}
+#confirm-box{
+  background:var(--purple);border:2px solid var(--gold-deep);border-radius:20px;
+  padding:24px 22px;max-width:320px;width:100%;text-align:center;
+  box-shadow:0 16px 40px rgba(0,0,0,.6);
+}
+#confirm-box h3{font-family:'Cinzel',serif;color:var(--gold);font-size:1.2rem;margin-bottom:10px;}
+#confirm-box p{font-size:.92rem;line-height:1.5;opacity:.9;margin-bottom:20px;}
+#confirm-box .confirm-buttons{display:flex;flex-direction:column;gap:10px;}
+#confirm-box .btn{padding:13px 20px;font-size:1rem;}
+#confirm-box .btn.secondary{padding:11px 20px;font-size:.9rem;}
+
+/* ---------- scoreboard chip ---------- */
+.scorebar{display:flex;gap:10px;align-items:center;justify-content:center;}
+.team-chip{
+  display:flex;align-items:center;gap:8px;padding:7px 14px;border-radius:999px;
+  font-weight:900;font-size:.95rem;border:2px solid transparent;
+}
+.team-chip .dot{width:12px;height:12px;border-radius:50%;}
+.team-chip.purple{background:rgba(85,48,133,.55);border-color:#7c58b8;}
+.team-chip.purple .dot{background:#B48CF2;}
+.team-chip.gold{background:rgba(240,194,75,.18);border-color:var(--gold-deep);color:var(--gold-pale);}
+.team-chip.gold .dot{background:var(--gold);}
+.vs{font-weight:900;opacity:.6;font-size:.8rem;}
+
+/* ---------- play ---------- */
+#play-screen{justify-content:space-between;padding:0;}
+#play-top{width:100%;padding:14px 16px 8px;display:flex;flex-direction:column;gap:8px;align-items:center;}
+#play-cat{font-size:.75rem;letter-spacing:.16em;text-transform:uppercase;font-weight:800;color:var(--gold-pale);opacity:.8;}
+#word-zone{flex:1;width:100%;display:flex;align-items:center;justify-content:center;padding:14px 18px;}
+#word-card{
+  width:100%;max-width:420px;min-height:200px;border-radius:26px;padding:28px 20px;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(180deg, rgba(0,0,0,.34), rgba(0,0,0,.18));
+  border:3px solid var(--gold-deep);
+  box-shadow:0 0 0 0 rgba(240,194,75,0), 0 12px 30px var(--shadow);
+}
+#word-text{
+  font-family:'Cinzel',serif;font-weight:900;color:var(--cream);
+  font-size:2.2rem;line-height:1.18;text-shadow:0 3px 10px rgba(0,0,0,.5);
+  overflow-wrap:break-word;word-break:break-word;max-width:100%;
+}
+#play-bottom{width:100%;padding:0 18px 24px;display:flex;flex-direction:column;gap:12px;align-items:center;}
+#action-row{display:flex;gap:12px;width:100%;max-width:420px;}
+#next-btn{flex:3;padding:22px 10px;font-size:1.5rem;border-radius:20px;}
+#stop-btn{
+  flex:1;padding:22px 6px;font-size:.95rem;border-radius:20px;border:none;cursor:pointer;
+  font-family:'Nunito Sans',sans-serif;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:#fff;
+  background:linear-gradient(180deg,#F0705C 0%,var(--coral) 45%,var(--coral-deep) 100%);
+  box-shadow:0 5px 0 #7d2418, 0 9px 18px var(--shadow);
+  transition:transform .08s ease, box-shadow .08s ease;
+}
+#stop-btn:active{transform:translateY(4px);box-shadow:0 1px 0 #7d2418, 0 4px 10px var(--shadow);}
+#stop-btn .stop-icon{display:block;font-size:1.3rem;margin-bottom:2px;}
+#pause-row{display:flex;gap:18px;}
+#pause-row button{
+  background:none;border:none;color:var(--gold-pale);opacity:.65;font-weight:800;
+  font-size:.8rem;letter-spacing:.06em;cursor:pointer;text-transform:uppercase;font-family:'Nunito Sans',sans-serif;
+}
+
+/* tick pulse — frame beats with the ticking */
+#play-screen.phase1 #word-card{animation:pulse 1s ease-in-out infinite;}
+#play-screen.phase2 #word-card{animation:pulse .6s ease-in-out infinite;border-color:var(--gold);}
+#play-screen.phase3 #word-card{animation:pulse-hot .3s ease-in-out infinite;border-color:var(--coral);}
+@keyframes pulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(240,194,75,0), 0 12px 30px var(--shadow);}
+  50%{box-shadow:0 0 26px 4px rgba(240,194,75,.4), 0 12px 30px var(--shadow);}
+}
+@keyframes pulse-hot{
+  0%,100%{box-shadow:0 0 0 0 rgba(230,84,63,0), 0 12px 30px var(--shadow);}
+  50%{box-shadow:0 0 32px 7px rgba(230,84,63,.6), 0 12px 30px var(--shadow);}
+}
+#play-screen.paused #word-text{filter:blur(14px);}
+
+/* ---------- time's up ---------- */
+#buzz-screen{background:radial-gradient(ellipse at 50% 20%, var(--coral) 0%, var(--coral-deep) 60%, #7d2418 100%);animation:buzzflash .3s ease 3;}
+@keyframes buzzflash{0%,100%{filter:brightness(1)}50%{filter:brightness(1.55)}}
+#buzz-screen h2{font-size:2.6rem;font-weight:900;color:#fff;text-shadow:0 4px 0 rgba(0,0,0,.3);margin-bottom:8px;}
+#buzz-screen .q{font-size:1.1rem;font-weight:800;color:#FFE9D6;margin:16px 0 22px;line-height:1.4;}
+.hold-buttons{display:flex;flex-direction:column;gap:14px;width:100%;max-width:320px;}
+.hold-btn{
+  padding:20px;border-radius:18px;border:none;cursor:pointer;font-family:'Nunito Sans',sans-serif;
+  font-weight:900;font-size:1.2rem;letter-spacing:.03em;color:#fff;
+  box-shadow:0 5px 0 rgba(0,0,0,.35), 0 9px 18px rgba(0,0,0,.35);
+  transition:transform .08s ease;
+}
+.hold-btn:active{transform:translateY(4px);box-shadow:0 1px 0 rgba(0,0,0,.35);}
+.hold-btn.purple{background:linear-gradient(180deg,#8257c2,#553085 60%,#3D1E63);}
+.hold-btn.gold{background:linear-gradient(180deg,var(--gold),var(--gold-deep));color:var(--purple-deep);}
+#buzz-screen .last-word{font-size:.9rem;color:#FFE9D6;opacity:.85;margin-top:20px;}
+
+/* ---------- said the word (foul) ---------- */
+#foul-screen{background:radial-gradient(ellipse at 50% 20%, var(--coral) 0%, var(--coral-deep) 60%, #7d2418 100%);}
+#foul-screen h2{font-size:2.2rem;font-weight:900;color:#fff;text-shadow:0 4px 0 rgba(0,0,0,.3);margin-bottom:8px;}
+#foul-screen .q{font-size:1.1rem;font-weight:800;color:#FFE9D6;margin:14px 0 22px;line-height:1.4;}
+#foul-screen .foul-word{font-family:'Cinzel',serif;font-weight:900;font-size:1.3rem;color:#fff;margin-bottom:6px;}
+#foul-screen .foul-cancel{
+  margin-top:24px;background:none;border:2px solid rgba(255,255,255,.55);border-radius:14px;
+  color:#FFE9D6;font-weight:800;font-size:.9rem;padding:11px 22px;cursor:pointer;
+  font-family:'Nunito Sans',sans-serif;
+}
+
+/* ---------- award ---------- */
+#award-screen .plus{font-size:3.6rem;font-weight:900;font-family:'Cinzel',serif;margin-bottom:6px;}
+#award-screen .plus.purple{color:#B48CF2;}
+#award-screen .plus.gold{color:var(--gold);}
+#award-screen h2{font-size:1.5rem;margin-bottom:18px;}
+#award-screen .scorebar{margin:10px 0 30px;transform:scale(1.15);}
+
+/* ---------- win ---------- */
+#win-screen .crown{font-size:4.6rem;animation:float 2.6s ease-in-out infinite;margin-bottom:8px;}
+#win-screen h2{font-family:'Cinzel',serif;font-size:2rem;color:var(--gold);margin-bottom:6px;}
+#win-screen .eight{
+  margin:20px 0 26px;max-width:320px;background:rgba(0,0,0,.28);
+  border:1px solid rgba(240,194,75,.35);border-radius:18px;padding:18px;font-size:.92rem;line-height:1.6;
+}
+#win-screen .eight b{color:var(--gold);}
+#win-screen .final{margin-bottom:10px;}
+
+/* confetti */
+.confetti{position:absolute;top:-14px;font-size:1.15rem;animation:fall linear forwards;pointer-events:none;z-index:5;}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:.7;}}
+
+@media (max-height:640px){
+  #title-screen .halo{width:92px;height:92px;font-size:2.6rem;}
+  #title-screen h1{font-size:2rem;}
+  #title-screen .sub{margin:10px 0 18px;}
+  .disclaimer{margin-top:14px;padding:9px 12px;font-size:.7rem;}
+  #word-text{font-size:1.8rem;}
+  #next-btn{padding:17px;font-size:1.25rem;}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none !important;transition:none !important;}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- TITLE -->
+  <section class="screen active" id="title-screen">
+    <div class="halo">🙌</div>
+    <h1 class="display">YOU BETTER<br>SAY IT!</h1>
+    <p class="sub">Say it. Guess it. Pass it — before the buzzer sounds!</p>
+    <div class="title-buttons">
+      <button class="btn" id="btn-play">Play</button>
+      <button class="btn secondary" id="btn-howto">How to Play</button>
+      <button class="btn secondary" id="btn-sound">🔊 Sound: On</button>
+    </div>
+    <div class="disclaimer">
+      <span class="d-title">⚠️ Play Safe</span>
+      This game is best played on a device with a <b>protective case and screen protector</b>.
+      Always <b>hand the phone</b> to the next team — <b>pass it, don't throw it!</b>
+      Play in a clear space, and mind your grip when the ticking speeds up.
+    </div>
+    <div class="brandline">COTLG Games Area</div>
+  </section>
+
+  <!-- HOW TO PLAY -->
+  <section class="screen" id="howto-screen">
+    <div class="card">
+      <h2 class="display">How to Play</h2>
+      <ol>
+        <li><span>Split into two teams: <b>Team Purple</b> and <b>Team Gold</b>. One player holds the phone.</span></li>
+        <li><span>Describe the word on screen to your team — but <b>never say the word itself</b> (or a piece of it)!</span></li>
+        <li><span>When your team guesses it, tap <b>GOT IT</b> and pass the phone to the other team fast.</span></li>
+        <li><span>The ticking speeds up as time runs out. The timer length is a secret — stay on your toes!</span></li>
+        <li><span>When the buzzer sounds, the team <b>holding the phone</b> loses the round. The other team scores.</span></li>
+        <li><span>First team to <b>8 points</b> wins — eight, the number of new beginnings!</span></li>
+      </ol>
+      <div style="text-align:center"><button class="btn" id="btn-howto-back">Got It</button></div>
+    </div>
+  </section>
+
+  <!-- CATEGORY SELECT -->
+  <section class="screen" id="cat-screen">
+    <h2 class="display">Pick a Category</h2>
+    <p class="lead">What will you be shouting about today?</p>
+    <div class="cat-grid" id="cat-grid"></div>
+  </section>
+
+  <!-- READY -->
+  <section class="screen" id="ready-screen">
+    <div class="pass-icon">📲</div>
+    <h2 class="display">Get Ready!</h2>
+    <p>Hand the phone to the first clue-giver. When you tap start, the clock starts ticking…</p>
+    <div class="cat-label" id="ready-cat"></div>
+    <div class="scorebar" style="margin-bottom:26px">
+      <div class="team-chip purple"><span class="dot"></span>Purple <span id="ready-score-p">0</span></div>
+      <span class="vs">VS</span>
+      <div class="team-chip gold"><span class="dot"></span>Gold <span id="ready-score-g">0</span></div>
+    </div>
+    <button class="btn" id="btn-start-round">Start Round</button>
+    <div style="margin-top:16px"><button class="btn secondary" id="btn-change-cat">Change Category</button></div>
+    <div class="manage-row">
+      <button class="btn secondary" id="btn-restart-game">↺ Restart Game</button>
+      <button class="btn secondary danger" id="btn-end-game">✕ End Game</button>
+    </div>
+  </section>
+
+  <!-- PLAY -->
+  <section class="screen" id="play-screen">
+    <div id="play-top">
+      <div class="scorebar">
+        <div class="team-chip purple"><span class="dot"></span><span id="play-score-p">0</span></div>
+        <span class="vs">VS</span>
+        <div class="team-chip gold"><span class="dot"></span><span id="play-score-g">0</span></div>
+      </div>
+      <div id="play-cat"></div>
+    </div>
+    <div id="word-zone">
+      <div id="word-card"><div id="word-text">Word</div></div>
+    </div>
+    <div id="play-bottom">
+      <div id="action-row">
+        <button class="btn" id="next-btn">Got It ➜ Pass!</button>
+        <button id="stop-btn"><span class="stop-icon">🛑</span>Stop</button>
+      </div>
+      <div id="pause-row">
+        <button id="btn-pause">⏸ Pause</button>
+        <button id="btn-quit">✕ Quit Round</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- BUZZ -->
+  <section class="screen" id="buzz-screen">
+    <h2 class="display">⏰ TIME'S UP!</h2>
+    <div class="q">Who was holding the phone<br>when the buzzer sounded?</div>
+    <div class="hold-buttons">
+      <button class="hold-btn purple" id="held-purple">Team Purple Was Holding It</button>
+      <button class="hold-btn gold" id="held-gold">Team Gold Was Holding It</button>
+    </div>
+    <div class="last-word" id="last-word"></div>
+  </section>
+
+  <!-- SAID THE WORD (FOUL) -->
+  <section class="screen" id="foul-screen">
+    <h2 class="display">🙊 SAID THE WORD!</h2>
+    <div class="foul-word" id="foul-word"></div>
+    <div class="q">Which team's clue-giver<br>said the word out loud?</div>
+    <div class="hold-buttons">
+      <button class="hold-btn purple" id="foul-purple">Team Purple Said It</button>
+      <button class="hold-btn gold" id="foul-gold">Team Gold Said It</button>
+    </div>
+    <button class="foul-cancel" id="foul-cancel">Oops — tapped by mistake, resume round</button>
+  </section>
+
+  <!-- AWARD -->
+  <section class="screen" id="award-screen">
+    <div class="plus" id="award-plus">+1</div>
+    <h2 class="display" id="award-team">Team Gold scores!</h2>
+    <div class="scorebar">
+      <div class="team-chip purple"><span class="dot"></span>Purple <span id="award-score-p">0</span></div>
+      <span class="vs">VS</span>
+      <div class="team-chip gold"><span class="dot"></span>Gold <span id="award-score-g">0</span></div>
+    </div>
+    <button class="btn" id="btn-next-round">Next Round</button>
+  </section>
+
+  <!-- WIN -->
+  <section class="screen" id="win-screen">
+    <div class="crown">👑</div>
+    <h2 id="win-team">Team Gold Wins!</h2>
+    <div class="scorebar final">
+      <div class="team-chip purple"><span class="dot"></span>Purple <span id="win-score-p">0</span></div>
+      <span class="vs">VS</span>
+      <div class="team-chip gold"><span class="dot"></span>Gold <span id="win-score-g">0</span></div>
+    </div>
+    <div class="eight"><b>Eight — the number of new beginnings.</b><br>Eight souls stepped off the ark into a brand-new world (1&nbsp;Peter&nbsp;3:20). Every finish line is a fresh start — run it back!</div>
+    <div class="title-buttons">
+      <button class="btn" id="btn-rematch">Rematch</button>
+      <button class="btn secondary" id="btn-new-game">New Categories</button>
+    </div>
+  </section>
+  <!-- CONFIRM DIALOG -->
+  <div id="confirm-overlay">
+    <div id="confirm-box">
+      <h3 id="confirm-title">Are you sure?</h3>
+      <p id="confirm-text"></p>
+      <div class="confirm-buttons">
+        <button class="btn" id="confirm-yes">Yes</button>
+        <button class="btn secondary" id="confirm-cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+"use strict";
+
+/* =====================================================
+   CONTENT LIBRARY
+   Decks are the growing content library. Categories are
+   the 5 player-facing buttons (+ Everything). To add a
+   seasonal pack later: add a deck, then point a category
+   at it (or add its id to an existing category's list).
+   ===================================================== */
+
+const DECKS = {
+
+  bible_people: {
+    name: "Bible People",
+    words: [
+      "Moses","Noah","David","Goliath","Esther","Ruth","Naomi","Jonah","Daniel",
+      "Shadrach, Meshach and Abednego","John the Baptist","Mary Magdalene","The Apostle Paul",
+      "Peter","Judas Iscariot","Lazarus","The Prodigal Son","The Good Samaritan","Zacchaeus",
+      "Samson","Delilah","Elijah","Elisha","Job","Abraham","Sarah","Isaac","Jacob",
+      "Joseph and the Coat of Many Colors","King Solomon","The Queen of Sheba","Nicodemus",
+      "The Woman at the Well","Adam","Eve","Cain and Abel","Methuselah","Enoch","Lot's Wife",
+      "Miriam","Aaron","Joshua","Rahab","Gideon","Deborah","King Saul","Jonathan","Bathsheba",
+      "Absalom","Nehemiah","Ezra","Isaiah","Jeremiah","Ezekiel","King Nebuchadnezzar",
+      "Elizabeth","Mary the Mother of Jesus","Joseph the Carpenter","The Wise Men","King Herod",
+      "Simeon","Anna the Prophetess","Andrew","The Sons of Thunder","Matthew the Tax Collector",
+      "Doubting Thomas","Pontius Pilate","Barabbas","Stephen","Philip","Cornelius","Lydia",
+      "Silas","Timothy","Titus","Priscilla and Aquila","Barnabas","The Ethiopian Eunuch",
+      "Ananias and Sapphira","Caleb","Hannah","Samuel","Jezebel","King Ahab","Naaman",
+      "The Rich Young Ruler","The Widow with Two Mites","Jairus","Blind Bartimaeus","Martha",
+      "Mary of Bethany","Simon of Cyrene","Melchizedek","Boaz"
+    ]
+  },
+
+  scripture_sayings: {
+    name: "Scripture & Sayings",
+    words: [
+      "The Lord Is My Shepherd","For God So Loved the World","In the Beginning","Let There Be Light",
+      "The Ten Commandments","The Lord's Prayer","Faith Without Works Is Dead","The Fruit of the Spirit",
+      "The Armor of God","Walk by Faith, Not by Sight","I Can Do All Things Through Christ",
+      "Be Still and Know","This Is the Day the Lord Has Made","Ask, Seek, Knock","The Golden Rule",
+      "Love Thy Neighbor","The Great Commission","No Weapon Formed Against Me",
+      "Trust in the Lord With All Thine Heart","The Valley of the Shadow of Death","Milk and Honey",
+      "A Threefold Cord","Iron Sharpens Iron","The Race Is Not Given to the Swift","The Wages of Sin",
+      "Amazing Grace","Fishers of Men","The Narrow Gate","The Salt of the Earth","The Light of the World",
+      "Seek Ye First the Kingdom","Be Ye Doers of the Word","Wait on the Lord","My Cup Runneth Over",
+      "Goodness and Mercy","The Battle Is Not Yours","Greater Is He That Is in You",
+      "All Things Work Together for Good","Study to Show Thyself Approved","Train Up a Child",
+      "Pride Goeth Before a Fall","A Soft Answer Turneth Away Wrath","Cast Your Cares","Taste and See",
+      "Create in Me a Clean Heart","Bless the Lord, O My Soul","Make a Joyful Noise",
+      "Enter His Gates with Thanksgiving","Weeping May Endure for a Night","Joy Cometh in the Morning",
+      "Fearfully and Wonderfully Made","Thy Word Is a Lamp","Lean Not on Your Own Understanding",
+      "Come Boldly to the Throne","Faith Cometh by Hearing","The Just Shall Live by Faith",
+      "Let Not Your Heart Be Troubled","In My Father's House Are Many Mansions",
+      "I Am the Way, the Truth, and the Life","Greater Love Hath No Man","Feed My Sheep",
+      "Upon This Rock","Get Thee Behind Me, Satan","Render Unto Caesar","The Least of These",
+      "Well Done, Good and Faithful Servant","The Lost Sheep","The Mustard Seed","Consider the Lilies",
+      "Judge Not","The Wise Man Built His House Upon the Rock","Let Your Light So Shine",
+      "Blessed Are the Peacemakers","Turn the Other Cheek","Go the Extra Mile",
+      "You Cannot Serve Two Masters","Where Your Treasure Is","By Their Fruits Ye Shall Know Them",
+      "Watch and Pray","The Spirit Is Willing but the Flesh Is Weak","My Grace Is Sufficient",
+      "A Thorn in the Flesh","Press Toward the Mark","Rejoice in the Lord Always",
+      "The Peace That Passeth Understanding","Pray Without Ceasing","Redeem the Time",
+      "Old Things Are Passed Away","A New Creature","Walk in the Spirit",
+      "Bear Ye One Another's Burdens","God Loveth a Cheerful Giver","You Reap What You Sow",
+      "Be Not Weary in Well Doing"
+    ]
+  },
+
+  church_life: {
+    name: "Church Life",
+    words: [
+      "Sunday's Best","The Amen Corner","Praise Break","Catching the Holy Ghost","The Church Fan",
+      "Testimony Service","Altar Call","Laying On of Hands","The Offering Plate","Usher",
+      "White Gloves","The Church Van","Vacation Bible School","Sunday School","The Announcements",
+      "Pastor's Anniversary","The Church Hat","Speaking in Tongues","The Benediction","Devotion",
+      "The Hammond Organ","Choir Rehearsal","Communion","Watch Night Service","The Repast",
+      "The Church Mother","The Nurse in White","Tarrying","Shouting Music","Turn to Your Neighbor",
+      "Dinner on the Grounds","The Mother's Board","The Deacon Board","The Trustees","The Pulpit",
+      "The Choir Stand","The Baptismal Pool","Anointing Oil","The Prayer Line","Fasting","Revival",
+      "The Guest Preacher","The Doors of the Church Are Open","Giving Honor to God",
+      "Praise the Lord, Everybody","Call and Response","Can I Get an Amen","Wednesday Night Bible Study",
+      "The Church Picnic","The Sound Man","The Church Bulletin","Baby Dedication","Homegoing Service",
+      "The Nursery","Children's Church","The Junior Choir","The Pastor's Study","Love Offering",
+      "Tithes and Offering","The Right Hand of Fellowship","New Members Class","The Church Kitchen",
+      "Fried Chicken After Church","The Deaconess","A Prayer Warrior","Running the Aisles",
+      "The Tambourine Lady","The Church Drummer","The Whooping Preacher","The Three-Hour Service",
+      "The Second Offering","Friends and Family Day","Women's Day","Men's Day","Youth Sunday",
+      "Pastor Appreciation Day","The Church Cookout","Grace Before the Meal","The Easter Speech",
+      "The Christmas Play","Resurrection Sunday","Palm Sunday","Good Friday Service","Sunrise Service",
+      "The Mourner's Bench","The Praise Report","A Prayer Request","The Sick and Shut-In List",
+      "Grape Juice in Little Cups","The Collection Basket","The Hat Pin","Church Shoes"
+    ]
+  },
+
+  gospel_music: {
+    name: "Gospel Music",
+    words: [
+      "Oh Happy Day","Take Me to the King","Total Praise","I Smile","Kirk Franklin","Mahalia Jackson",
+      "The Clark Sisters","Break Every Chain","Wade in the Water","Swing Low, Sweet Chariot",
+      "This Little Light of Mine","Precious Lord, Take My Hand","His Eye Is on the Sparrow","Stomp",
+      "Shirley Caesar","Fred Hammond","Yolanda Adams","Marvin Sapp","Never Would Have Made It",
+      "The Choir Director","The Tambourine","Praise Dance","The Hallelujah Chorus",
+      "Lift Every Voice and Sing","The Soloist","The Hymnal","Victory Is Mine","We Fall Down",
+      "Melodies from Heaven","Going Up Yonder","The Praise Team","Andraé Crouch","James Cleveland",
+      "Thomas Dorsey","Tramaine Hawkins","Walter Hawkins","The Winans","CeCe Winans","BeBe Winans",
+      "Donnie McClurkin","Tamela Mann","Tasha Cobbs","For Every Mountain","Kurt Carr",
+      "Richard Smallwood","Center of My Joy","Hezekiah Walker","Every Praise","Grateful","John P. Kee",
+      "The Mississippi Mass Choir","Mary Mary","Shackles (Praise You)","God in Me","Erica Campbell",
+      "Jonathan McReynolds","Travis Greene","Made a Way","Intentional","Tye Tribbett","Same God",
+      "William McDowell","Withholding Nothing","Byron Cage","Nobody Greater","Smokie Norful",
+      "I Need You Now","Israel Houghton","You Are Good","Blessed Assurance","How Great Thou Art",
+      "What a Friend We Have in Jesus","Leaning on the Everlasting Arms","At the Cross",
+      "The Old Rugged Cross","Pass Me Not, O Gentle Savior","I'll Fly Away",
+      "When the Saints Go Marching In","Down by the Riverside","Soon and Very Soon","Because He Lives",
+      "In the Garden","Sweet Hour of Prayer","It Is Well with My Soul","Great Is Thy Faithfulness",
+      "To God Be the Glory","I Surrender All","Just as I Am","Have Thine Own Way, Lord","Deep River",
+      "Go Down, Moses","There Is a Balm in Gilead","Every Time I Feel the Spirit",
+      "Old Time Religion","He's Got the Whole World in His Hands","The Choir Robe","The Key Change",
+      "The Organ Run"
+    ]
+  },
+
+  cotlg_convention: {
+    name: "COTLG & Convention",
+    words: [
+      "Chief William Christian","Bishop","National Convention","District Convention",
+      "Bishop Claude White","Bishop Elston Carter","Bishop Emeritus","Bishop Lawrence White",
+      "Bishop Ernest B. Dowdy","Chief Bishop Rex M. Waddell","Vice Chief Aaron Scruggs",
+      "Bishop Joseph Mitcham","Bishop S.T. Goodlow","Bishop T.L. Taylor","First Lady",
+      "First Lady Roselyn Waddell","Bishop Julian E. Turner","The Host Church","The Delegation",
+      "The General Assembly","Y.P.P.U.","Y.A.M.","Young People's Progressive Union",
+      "Young Adult Ministry","National Usher's Calendar","Men's Ministry","Women's Work",
+      "The Awards Gala","The Bishop's Banquet","Bishop McKeever Murray","Bishop Alphonso K. Smith",
+      "The Articles of Faith","Baptism","The Lord's Supper","Washing of Feet","Overseer",
+      "Bishop Stephen Hawkins","Bishop Matthew Townsend","The Vendor Area","Registration",
+      "The Welcome Banquet","The Souvenir Journal","The Annual Address","The Business Session",
+      "The Convention Choir","Roll Call","The Closing Service","The Building Fund",
+      "The District Meeting","The Ordination Service","The Hotel Lobby","The Church Charter"
+    ]
+  }
+};
+
+/* The 5 category buttons + Everything (decks:"all" mixes every deck). */
+const CATEGORIES = [
+  { id:"bible_people",      label:"Bible People",       icon:"📖", decks:["bible_people"] },
+  { id:"scripture_sayings", label:"Scripture & Sayings",icon:"📜", decks:["scripture_sayings"] },
+  { id:"church_life",       label:"Church Life",        icon:"⛪", decks:["church_life"] },
+  { id:"gospel_music",      label:"Gospel Music",       icon:"🎶", decks:["gospel_music"] },
+  { id:"cotlg_convention",  label:"COTLG & Convention", icon:"👑", decks:["cotlg_convention"] },
+  { id:"everything",        label:"Everything",         icon:"✨", decks:"all" }
+];
+
+/* ===================== GAME SETTINGS ===================== */
+const WIN_SCORE = 8;            // 8 — the number of new beginnings
+const TIMER_MIN_MS = 45000;     // hidden timer: 45s minimum
+const TIMER_MAX_MS = 75000;     // hidden timer: 75s maximum
+
+/* ===================== STATE ===================== */
+const state = {
+  category: null,      // selected category object
+  pool: [],            // shuffled words not yet used this session
+  used: [],            // words already shown
+  scores: { purple: 0, gold: 0 },
+  playing: false,
+  paused: false,
+  soundOn: true,
+  roundStart: 0,       // performance.now() at round start
+  pausedAt: 0,
+  duration: 0,         // this round's secret duration
+  tickTimeout: null,
+  endTimeout: null,
+  currentWord: ""
+};
+
+/* ===================== HELPERS ===================== */
+const $ = id => document.getElementById(id);
+function show(id){
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  $(id).classList.add("active");
+}
+function shuffle(arr){
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function buildPool(category){
+  let words = [];
+  if (category.decks === "all"){
+    for (const key in DECKS) words = words.concat(DECKS[key].words);
+  } else {
+    category.decks.forEach(d => { words = words.concat(DECKS[d].words); });
+  }
+  return shuffle(words);
+}
+function nextWord(){
+  if (state.pool.length === 0){        // reshuffle when the pool runs dry
+    state.pool = shuffle(state.used);
+    state.used = [];
+  }
+  const word = state.pool.pop();
+  state.used.push(word);
+  state.currentWord = word;
+  const el = $("word-text");
+  el.textContent = word;
+  el.style.fontSize = word.length > 26 ? "1.5rem" : (word.length > 16 ? "1.85rem" : "2.2rem");
+}
+function updateScoreboards(){
+  ["ready","play","award","win"].forEach(p => {
+    const sp = $(p + "-score-p"), sg = $(p + "-score-g");
+    if (sp) sp.textContent = state.scores.purple;
+    if (sg) sg.textContent = state.scores.gold;
+  });
+}
+
+/* ===================== AUDIO ===================== */
+let audioCtx = null;
+function ensureAudio(){
+  if (!audioCtx){
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (AC) audioCtx = new AC();
+  }
+  if (audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+}
+function playTick(pitch){
+  if (!state.soundOn || !audioCtx) return;
+  const t = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = "square";
+  osc.frequency.value = pitch;
+  gain.gain.setValueAtTime(0.0001, t);
+  gain.gain.exponentialRampToValueAtTime(0.35, t + 0.005);
+  gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.06);
+  osc.connect(gain).connect(audioCtx.destination);
+  osc.start(t); osc.stop(t + 0.08);
+}
+function playBuzzer(){
+  if (state.soundOn && audioCtx){
+    const t = audioCtx.currentTime;
+    [110, 138].forEach(freq => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = "sawtooth";
+      osc.frequency.setValueAtTime(freq, t);
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.exponentialRampToValueAtTime(0.5, t + 0.02);
+      gain.gain.setValueAtTime(0.5, t + 1.1);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 1.4);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start(t); osc.stop(t + 1.45);
+    });
+  }
+  if (navigator.vibrate){ try { navigator.vibrate([600, 150, 600]); } catch(e){} }
+}
+function playFoul(){
+  if (state.soundOn && audioCtx){
+    const t = audioCtx.currentTime;
+    [0, 0.18].forEach(offset => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = "sawtooth";
+      osc.frequency.setValueAtTime(160, t + offset);
+      gain.gain.setValueAtTime(0.0001, t + offset);
+      gain.gain.exponentialRampToValueAtTime(0.4, t + offset + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + offset + 0.15);
+      osc.connect(gain).connect(audioCtx.destination);
+      osc.start(t + offset); osc.stop(t + offset + 0.16);
+    });
+  }
+  if (navigator.vibrate){ try { navigator.vibrate(200); } catch(e){} }
+}
+function playPoint(){
+  if (!state.soundOn || !audioCtx) return;
+  const t = audioCtx.currentTime;
+  [523, 659, 784].forEach((f, i) => {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = "triangle"; osc.frequency.value = f;
+    const s = t + i * 0.09;
+    gain.gain.setValueAtTime(0.0001, s);
+    gain.gain.exponentialRampToValueAtTime(0.3, s + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, s + 0.25);
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start(s); osc.stop(s + 0.3);
+  });
+}
+
+/* ===================== TIMER =====================
+   Hidden, randomized duration. Ticks accelerate in
+   three phases, like the classic handheld:
+   phase 1 (0–55% elapsed): slow tick
+   phase 2 (55–85%):        faster, brighter tick
+   phase 3 (85–100%):       frantic ticking
+   ================================================= */
+function elapsedMs(){ return performance.now() - state.roundStart; }
+
+function scheduleTick(){
+  if (!state.playing || state.paused) return;
+  const frac = elapsedMs() / state.duration;
+  let interval, pitch, phase;
+  if (frac < 0.55){ interval = 1000; pitch = 700;  phase = "phase1"; }
+  else if (frac < 0.85){ interval = 550; pitch = 880; phase = "phase2"; }
+  else { interval = 280; pitch = 1100; phase = "phase3"; }
+  const ps = $("play-screen");
+  ps.classList.remove("phase1","phase2","phase3");
+  ps.classList.add(phase);
+  playTick(pitch);
+  state.tickTimeout = setTimeout(scheduleTick, interval);
+}
+
+function startRound(){
+  ensureAudio();
+  state.playing = true;
+  state.paused = false;
+  state.duration = TIMER_MIN_MS + Math.random() * (TIMER_MAX_MS - TIMER_MIN_MS);
+  state.roundStart = performance.now();
+  nextWord();
+  updateScoreboards();
+  $("play-cat").textContent = state.category.label;
+  $("play-screen").classList.remove("paused");
+  $("btn-pause").textContent = "⏸ Pause";
+  show("play-screen");
+  scheduleTick();
+  state.endTimeout = setTimeout(endRound, state.duration);
+}
+
+function stopTimers(){
+  clearTimeout(state.tickTimeout);
+  clearTimeout(state.endTimeout);
+}
+
+function endRound(){
+  state.playing = false;
+  stopTimers();
+  $("play-screen").classList.remove("phase1","phase2","phase3");
+  playBuzzer();
+  $("last-word").textContent = 'The word was: "' + state.currentWord + '"';
+  show("buzz-screen");
+}
+
+function togglePause(){
+  if (!state.playing) return;
+  if (!state.paused){
+    state.paused = true;
+    state.pausedAt = performance.now();
+    stopTimers();
+    $("play-screen").classList.add("paused");
+    $("btn-pause").textContent = "▶ Resume";
+  } else {
+    state.paused = false;
+    const pausedFor = performance.now() - state.pausedAt;
+    state.roundStart += pausedFor;                       // shift the clock
+    $("play-screen").classList.remove("paused");
+    $("btn-pause").textContent = "⏸ Pause";
+    scheduleTick();
+    state.endTimeout = setTimeout(endRound, Math.max(50, state.duration - elapsedMs()));
+  }
+}
+
+/* ===================== SCORING ===================== */
+function awardPoint(holdingTeam){
+  const winner = holdingTeam === "purple" ? "gold" : "purple";
+  state.scores[winner]++;
+  updateScoreboards();
+  playPoint();
+  if (state.scores[winner] >= WIN_SCORE){
+    showWin(winner);
+    return;
+  }
+  const plus = $("award-plus");
+  plus.textContent = "+1";
+  plus.className = "plus " + winner;
+  $("award-team").textContent = "Team " + (winner === "gold" ? "Gold" : "Purple") + " scores!";
+  show("award-screen");
+}
+
+function showWin(winner){
+  $("win-team").textContent = "Team " + (winner === "gold" ? "Gold" : "Purple") + " Wins!";
+  updateScoreboards();
+  show("win-screen");
+  dropConfetti();
+}
+
+function dropConfetti(){
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const glyphs = ["🎉","✨","🙌","⭐","💜","💛"];
+  for (let i = 0; i < 34; i++){
+    const c = document.createElement("div");
+    c.className = "confetti";
+    c.textContent = glyphs[Math.floor(Math.random() * glyphs.length)];
+    c.style.left = Math.random() * 100 + "vw";
+    c.style.animationDuration = (2.4 + Math.random() * 2.4) + "s";
+    c.style.animationDelay = (Math.random() * 0.9) + "s";
+    $("win-screen").appendChild(c);
+    setTimeout(() => c.remove(), 6500);
+  }
+}
+
+/* ===================== NAV / EVENTS ===================== */
+function buildCategoryGrid(){
+  const grid = $("cat-grid");
+  grid.innerHTML = "";
+  CATEGORIES.forEach(cat => {
+    const tile = document.createElement("button");
+    tile.className = "cat-tile" + (cat.id === "everything" ? " everything" : "");
+    tile.innerHTML = '<span class="icon">' + cat.icon + '</span><span class="name">' + cat.label + '</span>';
+    tile.addEventListener("click", () => {
+      ensureAudio();
+      state.category = cat;
+      state.pool = buildPool(cat);
+      state.used = [];
+      $("ready-cat").textContent = cat.icon + " " + cat.label;
+      updateScoreboards();
+      show("ready-screen");
+    });
+    grid.appendChild(tile);
+  });
+}
+
+function resetMatch(){
+  state.scores = { purple: 0, gold: 0 };
+  updateScoreboards();
+}
+
+/* ---------- confirm dialog ---------- */
+let confirmAction = null;
+function askConfirm(title, text, yesLabel, action){
+  $("confirm-title").textContent = title;
+  $("confirm-text").textContent = text;
+  $("confirm-yes").textContent = yesLabel;
+  confirmAction = action;
+  $("confirm-overlay").classList.add("open");
+}
+$("confirm-yes").addEventListener("click", () => {
+  $("confirm-overlay").classList.remove("open");
+  if (confirmAction) confirmAction();
+  confirmAction = null;
+});
+$("confirm-cancel").addEventListener("click", () => {
+  $("confirm-overlay").classList.remove("open");
+  confirmAction = null;
+});
+
+$("btn-restart-game").addEventListener("click", () => {
+  askConfirm(
+    "Restart Game?",
+    "Scores go back to 0\u20130 and the word pool reshuffles. Same category, fresh start.",
+    "Yes, Restart",
+    () => {
+      resetMatch();
+      state.pool = buildPool(state.category);
+      state.used = [];
+      show("ready-screen");
+    }
+  );
+});
+$("btn-end-game").addEventListener("click", () => {
+  askConfirm(
+    "End Game?",
+    "This ends the game before anyone reaches 8. You'll return to the title screen.",
+    "Yes, End Game",
+    () => {
+      resetMatch();
+      show("title-screen");
+    }
+  );
+});
+
+$("btn-play").addEventListener("click", () => { ensureAudio(); resetMatch(); show("cat-screen"); });
+$("btn-howto").addEventListener("click", () => show("howto-screen"));
+$("btn-howto-back").addEventListener("click", () => show("title-screen"));
+$("btn-sound").addEventListener("click", () => {
+  state.soundOn = !state.soundOn;
+  $("btn-sound").textContent = state.soundOn ? "🔊 Sound: On" : "🔇 Sound: Off";
+  if (state.soundOn) ensureAudio();
+});
+$("btn-start-round").addEventListener("click", startRound);
+$("btn-change-cat").addEventListener("click", () => show("cat-screen"));
+$("next-btn").addEventListener("click", () => {
+  if (state.playing && !state.paused) nextWord();
+});
+$("btn-pause").addEventListener("click", togglePause);
+$("btn-quit").addEventListener("click", () => {
+  state.playing = false;
+  stopTimers();
+  $("play-screen").classList.remove("phase1","phase2","phase3","paused");
+  show("ready-screen");
+});
+$("held-purple").addEventListener("click", () => awardPoint("purple"));
+$("held-gold").addEventListener("click", () => awardPoint("gold"));
+
+/* ---------- STOP: clue-giver said the word ---------- */
+$("stop-btn").addEventListener("click", () => {
+  if (!state.playing || state.paused) return;
+  state.paused = true;                       // freeze the clock while we sort it out
+  state.pausedAt = performance.now();
+  stopTimers();
+  playFoul();
+  $("play-screen").classList.remove("phase1","phase2","phase3");
+  $("foul-word").textContent = '"' + state.currentWord + '"';
+  show("foul-screen");
+});
+function foulAward(team){
+  state.playing = false;
+  state.paused = false;
+  awardPoint(team);                          // saying the word = point to the other team
+}
+$("foul-purple").addEventListener("click", () => foulAward("purple"));
+$("foul-gold").addEventListener("click", () => foulAward("gold"));
+$("foul-cancel").addEventListener("click", () => {
+  // resume the round exactly where it left off, with a fresh word
+  state.paused = false;
+  const pausedFor = performance.now() - state.pausedAt;
+  state.roundStart += pausedFor;
+  nextWord();
+  show("play-screen");
+  scheduleTick();
+  state.endTimeout = setTimeout(endRound, Math.max(50, state.duration - elapsedMs()));
+});
+
+$("btn-next-round").addEventListener("click", () => show("ready-screen"));
+$("btn-rematch").addEventListener("click", () => {
+  resetMatch();
+  state.pool = buildPool(state.category);
+  state.used = [];
+  show("ready-screen");
+});
+$("btn-new-game").addEventListener("click", () => { resetMatch(); show("cat-screen"); });
+
+/* Keep the round honest if the app is backgrounded mid-round */
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden && state.playing && !state.paused) togglePause();
+});
+
+buildCategoryGrid();
+updateScoreboards();
+</script>
+</body>
+</html>
